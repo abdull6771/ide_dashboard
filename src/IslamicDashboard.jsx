@@ -1563,6 +1563,7 @@ const TABS = [
   { id: "disclosure", label: "Disclosure", icon: "📋" },
   { id: "benchmark", label: "Benchmarking", icon: "⚖️" },
   { id: "recommendations", label: "Recommendations", icon: "🎯" },
+  { id: "askai", label: "Ask AI", icon: "🤖" },
 ];
 
 /* ── PAGE: Overview ─────────────────────────────────────────────── */
@@ -1612,7 +1613,7 @@ function OverviewPage() {
             fontWeight: 700,
           }}
         >
-          Bursa Malaysia · 2022–2024 · AI-Extracted Research Data
+          Bursa Malaysia · 2022–2024
         </p>
         <h1
           style={{
@@ -1682,7 +1683,7 @@ function OverviewPage() {
         />
         <KpiCard
           icon="📄"
-          label="Reports Analysed (AI)"
+          label="Reports Analysed"
           value="2,706"
           color={C.gold}
           sub="Annual + CG + Sustainability"
@@ -6397,6 +6398,465 @@ function RecommendationsPage() {
 }
 
 /* ── Root App ───────────────────────────────────────────────────── */
+/* ── PAGE: Ask AI ──────────────────────────────────────────────── */
+const AI_CONTEXT = JSON.stringify({ DB, REC }, null, 0);
+
+const SUGGESTED_QUESTIONS = [
+  "Which sector has the highest PLCT score and why?",
+  "What are the key gaps in Customer Experience across sectors?",
+  "Which sectors should prioritise New Business Models investment?",
+  "How has digital maturity changed from 2022 to 2024?",
+  "What are the top recommendations to improve the national PLCT index?",
+  "Compare Telecom & Media vs Plantation & Agriculture PLCT performance.",
+];
+
+function AskAIPage() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const bottomRef = useState(null);
+  const messagesEndRef = { current: null };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const sendMessage = async (text) => {
+    const question = (text || input).trim();
+    if (!question) return;
+    setInput("");
+    setError(null);
+
+    const newMessages = [...messages, { role: "user", content: question }];
+    setMessages(newMessages);
+    setLoading(true);
+
+    setTimeout(scrollToBottom, 50);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: newMessages,
+          context: AI_CONTEXT,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Server error");
+
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.reply },
+      ]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setTimeout(scrollToBottom, 50);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Header card */}
+      <Card>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 12,
+              background: C.emerald,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 24,
+              flexShrink: 0,
+            }}
+          >
+            🤖
+          </div>
+          <div>
+            <h2
+              style={{
+                margin: 0,
+                fontFamily: "'Playfair Display',serif",
+                fontSize: 20,
+                fontWeight: 700,
+                color: C.emerald,
+              }}
+            >
+              Ask the DEII AI Analyst
+            </h2>
+            <p style={{ margin: "4px 0 0", fontSize: 12, color: C.muted }}>
+              Powered by Gemini · Full access to 12,192 initiatives, 16 sectors
+              &amp; all PLCT data
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 280px",
+          gap: 16,
+          alignItems: "start",
+        }}
+      >
+        {/* Chat panel */}
+        <Card
+          style={{
+            padding: 0,
+            display: "flex",
+            flexDirection: "column",
+            height: 560,
+          }}
+        >
+          {/* Messages area */}
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              padding: "20px 24px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 14,
+            }}
+          >
+            {messages.length === 0 && (
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: C.muted,
+                  textAlign: "center",
+                  padding: "40px 20px",
+                }}
+              >
+                <div style={{ fontSize: 40, marginBottom: 12 }}>💬</div>
+                <div
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: C.text,
+                    marginBottom: 6,
+                  }}
+                >
+                  Ask anything about the dashboard data
+                </div>
+                <div style={{ fontSize: 12 }}>
+                  Try one of the suggested questions on the right, or type your
+                  own below.
+                </div>
+              </div>
+            )}
+            {messages.map((m, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  flexDirection: m.role === "user" ? "row-reverse" : "row",
+                  gap: 10,
+                  alignItems: "flex-start",
+                }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    background: m.role === "user" ? C.emerald : C.gold,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 14,
+                  }}
+                >
+                  {m.role === "user" ? "👤" : "🤖"}
+                </div>
+                <div
+                  style={{
+                    maxWidth: "78%",
+                    background: m.role === "user" ? C.emerald : C.cream,
+                    color: m.role === "user" ? C.white : C.text,
+                    borderRadius:
+                      m.role === "user"
+                        ? "16px 4px 16px 16px"
+                        : "4px 16px 16px 16px",
+                    padding: "10px 14px",
+                    fontSize: 13,
+                    lineHeight: 1.65,
+                    whiteSpace: "pre-wrap",
+                    border:
+                      m.role === "assistant" ? `1px solid ${C.border}` : "none",
+                  }}
+                >
+                  {m.content}
+                </div>
+              </div>
+            ))}
+            {loading && (
+              <div
+                style={{ display: "flex", gap: 10, alignItems: "flex-start" }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    background: C.gold,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 14,
+                  }}
+                >
+                  🤖
+                </div>
+                <div
+                  style={{
+                    background: C.cream,
+                    border: `1px solid ${C.border}`,
+                    borderRadius: "4px 16px 16px 16px",
+                    padding: "12px 16px",
+                    display: "flex",
+                    gap: 5,
+                    alignItems: "center",
+                  }}
+                >
+                  {[0, 1, 2].map((d) => (
+                    <div
+                      key={d}
+                      style={{
+                        width: 7,
+                        height: 7,
+                        borderRadius: "50%",
+                        background: C.muted,
+                        animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite`,
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            {error && (
+              <div
+                style={{
+                  background: "#FEF2F2",
+                  border: `1px solid #FECACA`,
+                  borderRadius: 8,
+                  padding: "10px 14px",
+                  fontSize: 12,
+                  color: C.danger,
+                }}
+              >
+                ⚠ {error}
+              </div>
+            )}
+            <div
+              ref={(el) => {
+                messagesEndRef.current = el;
+              }}
+            />
+          </div>
+
+          {/* Input bar */}
+          <div
+            style={{
+              borderTop: `1px solid ${C.border}`,
+              padding: "14px 20px",
+              display: "flex",
+              gap: 10,
+              alignItems: "flex-end",
+              background: C.white,
+              borderRadius: "0 0 12px 12px",
+            }}
+          >
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask about sectors, PLCT scores, trends, recommendations…"
+              rows={2}
+              style={{
+                flex: 1,
+                resize: "none",
+                border: `1.5px solid ${C.border}`,
+                borderRadius: 10,
+                padding: "9px 12px",
+                fontSize: 13,
+                fontFamily: "'DM Sans',sans-serif",
+                outline: "none",
+                lineHeight: 1.5,
+                color: C.text,
+                background: C.cream,
+              }}
+            />
+            <button
+              onClick={() => sendMessage()}
+              disabled={loading || !input.trim()}
+              style={{
+                height: 42,
+                width: 42,
+                borderRadius: 10,
+                background: loading || !input.trim() ? C.border : C.emerald,
+                border: "none",
+                cursor: loading || !input.trim() ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 18,
+                flexShrink: 0,
+                transition: "background 0.2s",
+              }}
+            >
+              ➤
+            </button>
+          </div>
+        </Card>
+
+        {/* Suggested questions + info sidebar */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <Card>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: C.emerald,
+                marginBottom: 10,
+              }}
+            >
+              💡 Suggested Questions
+            </div>
+            {SUGGESTED_QUESTIONS.map((q, i) => (
+              <button
+                key={i}
+                onClick={() => sendMessage(q)}
+                disabled={loading}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  textAlign: "left",
+                  background: C.cream,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 8,
+                  padding: "8px 10px",
+                  fontSize: 11,
+                  cursor: loading ? "not-allowed" : "pointer",
+                  color: C.text,
+                  marginBottom: 6,
+                  lineHeight: 1.5,
+                  transition: "border-color 0.15s, background 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = C.emerald;
+                  e.currentTarget.style.background = C.light;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = C.border;
+                  e.currentTarget.style.background = C.cream;
+                }}
+              >
+                {q}
+              </button>
+            ))}
+          </Card>
+
+          <Card>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: C.emerald,
+                marginBottom: 8,
+              }}
+            >
+              📊 Data in Context
+            </div>
+            {[
+              { label: "Initiatives", value: "12,192" },
+              { label: "Companies", value: "854" },
+              { label: "Sectors", value: "16" },
+              { label: "Years", value: "2022–2024" },
+              { label: "PLCT Dimensions", value: "4" },
+            ].map((d) => (
+              <div
+                key={d.label}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "4px 0",
+                  borderBottom: `1px solid ${C.sand}`,
+                  fontSize: 11,
+                }}
+              >
+                <span style={{ color: C.muted }}>{d.label}</span>
+                <span style={{ fontWeight: 700, color: C.emerald }}>
+                  {d.value}
+                </span>
+              </div>
+            ))}
+            <div
+              style={{
+                marginTop: 10,
+                fontSize: 10,
+                color: C.muted,
+                lineHeight: 1.6,
+              }}
+            >
+              Model: Gemini 1.5 Flash · Context: Full DB + REC
+            </div>
+          </Card>
+
+          {messages.length > 0 && (
+            <button
+              onClick={() => {
+                setMessages([]);
+                setError(null);
+              }}
+              style={{
+                width: "100%",
+                padding: "8px 14px",
+                borderRadius: 8,
+                border: `1px solid ${C.border}`,
+                background: C.white,
+                color: C.muted,
+                fontSize: 11,
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              🗑 Clear conversation
+            </button>
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes bounce {
+          0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+          40% { transform: translateY(-6px); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function App() {
   const [tab, setTab] = useState("overview");
   const pages = {
@@ -6407,6 +6867,7 @@ export default function App() {
     disclosure: <DisclosurePage />,
     benchmark: <BenchmarkPage />,
     recommendations: <RecommendationsPage />,
+    askai: <AskAIPage />,
   };
 
   return (
@@ -6472,15 +6933,6 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 10, color: C.gold, fontWeight: 700 }}>
-                  1,127 Companies · 12,192 Initiatives · PLCT Framework
-                </div>
-                <div style={{ fontSize: 9, color: "#6B9E8A" }}>
-                  AI-Extracted · GenAI Validated · For Researchers, Companies &
-                  Policy Makers
-                </div>
-              </div>
             </div>
             {/* Nav tabs */}
             <div
@@ -6512,21 +6964,7 @@ export default function App() {
                   }}
                 >
                   {t.icon} {t.label}
-                  {t.id === "recommendations" && (
-                    <span
-                      style={{
-                        marginLeft: 5,
-                        fontSize: 9,
-                        background: C.gold,
-                        color: C.deep,
-                        borderRadius: 10,
-                        padding: "1px 6px",
-                        fontWeight: 900,
-                      }}
-                    >
-                      NEW
-                    </span>
-                  )}
+                  {t.id === "recommendations"}
                 </button>
               ))}
             </div>
