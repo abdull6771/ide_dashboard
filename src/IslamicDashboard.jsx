@@ -51,6 +51,28 @@ const PAL = [
   "#1D4ED8",
 ];
 const MATPAL = { Basic: "#C5973A", Developing: "#0B4D3A", Advanced: "#1E6F7A" };
+const MATURITY_DESC = {
+  Basic:
+    "Basic maturity: The company discloses some digital initiatives but lacks a coherent digital strategy. Coverage is limited, with few structured programmes and minimal integration of digital into core operations.",
+  Developing:
+    "Developing maturity: The company demonstrates a structured approach to digital transformation with multiple initiatives across functions. Digital strategy is documented but integration and measurement of impact remain partial.",
+  Advanced:
+    "Advanced maturity: The company exhibits comprehensive, fully integrated digital strategy with measurable outcomes, cross-functional deployment, and evidence of continuous innovation and leadership in digital transformation.",
+};
+const PLCT_DESC = {
+  OE: "Operational Efficiency (OE): Measures how digital initiatives streamline internal processes, reduce costs, improve productivity, and automate workflows. This is consistently the highest-scoring PLCT dimension across the Islamic digital economy.",
+  PE: "People Empowerment (PE): Captures digital initiatives focused on upskilling employees, improving workforce capabilities, fostering talent development, and enabling human-centred digital workplaces. The only dimension showing steady year-on-year improvement.",
+  CE: "Customer Experience (CE): Reflects digital efforts aimed at enhancing customer journeys, personalisation, digital service delivery, and engagement quality. CE is the only declining PLCT dimension and remains critically underinvested despite delivering high impact scores.",
+  NBM: "New Business Models (NBM): Assesses innovation in revenue streams, platform-based models, digital ecosystems, and disruptive products or services. NBM has the largest gap to maximum (81 points) and is heavily underrepresented across all sectors.",
+};
+const INNOV_DESC = {
+  Incremental:
+    "Incremental innovation: The initiative introduces minor improvements or refinements to existing processes, products, or services using digital tools. These are low-risk, efficiency-oriented adaptations that build on what already exists — e.g. digitising a paper form or automating a routine task.",
+  Moderate:
+    "Moderate innovation: The initiative involves meaningful digital transformation that noticeably enhances capabilities, customer touchpoints, or operational models. These go beyond optimisation and introduce new digital features or platforms — e.g. launching a mobile app, deploying analytics dashboards, or integrating AI-assisted workflows.",
+  Transformational:
+    "Transformational innovation: The initiative represents a fundamental reimagining of business models, value chains, or industry engagement through digital technology. These are high-impact, high-ambition initiatives — e.g. platform ecosystems, AI-driven services, or fully digital-native business units. Critically rare in the Islamic Digital Economy (only 0.6% of all initiatives).",
+};
 
 /* ── Data ──────────────────────────────────────────────────────── */
 const DB = {
@@ -1332,6 +1354,80 @@ const KpiCard = ({ label, value, sub, color = C.emerald, icon, note }) => (
   </Card>
 );
 
+/* ── Maturity hover tooltip ───────────────────────────────────── */
+const HoverTip = ({ label, color, desc, title }) => {
+  const [show, setShow] = useState(false);
+  const tipTitle = title ?? `${label} Maturity`;
+  const tipDesc = desc ?? MATURITY_DESC[label];
+  return (
+    <span
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        alignItems: "center",
+      }}
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 15,
+          height: 15,
+          borderRadius: "50%",
+          background: color,
+          color: C.white,
+          fontSize: 9,
+          fontWeight: 700,
+          cursor: "default",
+          flexShrink: 0,
+          marginLeft: 5,
+          lineHeight: 1,
+          userSelect: "none",
+        }}
+      >
+        i
+      </span>
+      {show && (
+        <div
+          style={{
+            position: "absolute",
+            left: "calc(100% + 8px)",
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 9999,
+            background: C.white,
+            border: `1px solid ${C.border}`,
+            borderRadius: 8,
+            padding: "10px 14px",
+            boxShadow: "0 6px 24px rgba(0,0,0,0.14)",
+            width: 260,
+            fontSize: 11,
+            lineHeight: 1.6,
+            color: C.text,
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 700,
+              color: color,
+              marginBottom: 5,
+              fontSize: 12,
+              borderBottom: `1px solid ${C.sand}`,
+              paddingBottom: 5,
+            }}
+          >
+            {tipTitle}
+          </div>
+          {tipDesc}
+        </div>
+      )}
+    </span>
+  );
+};
+
 const TT = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -1527,7 +1623,7 @@ function OverviewPage() {
             lineHeight: 1.3,
           }}
         >
-          Advancing the Islamic Digital Economy in Malaysia
+          Digital Enablement Initiatives Index
         </h1>
         <p
           style={{
@@ -1612,75 +1708,122 @@ function OverviewPage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1.4fr 1fr",
+          gridTemplateColumns: "1fr 1fr 1fr",
           gap: 16,
           marginBottom: 16,
         }}
       >
-        <Card>
-          <SectionTitle sub="Year-on-year growth in companies and digital initiatives">
-            Report Coverage Growth 2022–2024
-          </SectionTitle>
-          <ResponsiveContainer width="100%" height={210}>
-            <ComposedChart data={DB.yearCoverage}>
-              <CartesianGrid strokeDasharray="3 3" stroke={C.sand} />
-              <XAxis dataKey="year" tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="l" tick={{ fontSize: 11 }} />
-              <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11 }} />
-              <Tooltip content={<TT />} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar
-                yAxisId="l"
-                dataKey="companies"
-                name="Companies"
-                fill={C.emerald}
-                radius={[4, 4, 0, 0]}
-              />
-              <Bar
-                yAxisId="r"
-                dataKey="initiatives"
-                name="Initiatives"
-                fill={C.gold}
-                radius={[4, 4, 0, 0]}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3,1fr)",
-              gap: 8,
-              marginTop: 12,
-            }}
-          >
-            {DB.yearCoverage.map((d, i) => (
-              <div
-                key={i}
-                style={{
-                  background: C.cream,
-                  borderRadius: 8,
-                  padding: "8px 12px",
-                  borderLeft: `3px solid ${PAL[i]}`,
-                }}
-              >
+        <div
+          style={{
+            display: "contents",
+          }}
+        >
+          {/* ── Companies figure ── */}
+          <Card>
+            <SectionTitle sub="Year-on-year growth 2022–2024">
+              Companies Covered
+            </SectionTitle>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={DB.yearCoverage}>
+                <CartesianGrid strokeDasharray="3 3" stroke={C.sand} />
+                <XAxis dataKey="year" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 11 }} domain={[600, "auto"]} />
+                <Tooltip content={<TT />} />
+                <Bar
+                  dataKey="companies"
+                  name="Companies"
+                  fill={C.emerald}
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3,1fr)",
+                gap: 6,
+                marginTop: 10,
+              }}
+            >
+              {DB.yearCoverage.map((d, i) => (
                 <div
+                  key={i}
                   style={{
-                    fontFamily: "'Playfair Display',serif",
-                    fontSize: 16,
-                    fontWeight: 700,
-                    color: PAL[i],
+                    background: C.cream,
+                    borderRadius: 8,
+                    padding: "6px 10px",
+                    borderLeft: `3px solid ${PAL[i]}`,
                   }}
                 >
-                  {d.year}
+                  <div
+                    style={{
+                      fontFamily: "'Playfair Display',serif",
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: PAL[i],
+                    }}
+                  >
+                    {d.companies}
+                  </div>
+                  <div style={{ fontSize: 10, color: C.muted }}>{d.year}</div>
                 </div>
-                <div style={{ fontSize: 10, color: C.muted }}>
-                  {d.companies} cos · {d.initiatives.toLocaleString()}{" "}
-                  initiatives
+              ))}
+            </div>
+          </Card>
+
+          {/* ── Initiatives figure ── */}
+          <Card>
+            <SectionTitle sub="Year-on-year growth 2022–2024">
+              Digital Initiatives Covered
+            </SectionTitle>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={DB.yearCoverage}>
+                <CartesianGrid strokeDasharray="3 3" stroke={C.sand} />
+                <XAxis dataKey="year" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 11 }} domain={[3000, "auto"]} />
+                <Tooltip content={<TT />} />
+                <Bar
+                  dataKey="initiatives"
+                  name="Initiatives"
+                  fill={C.gold}
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3,1fr)",
+                gap: 6,
+                marginTop: 10,
+              }}
+            >
+              {DB.yearCoverage.map((d, i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: C.cream,
+                    borderRadius: 8,
+                    padding: "6px 10px",
+                    borderLeft: `3px solid ${PAL[i]}`,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "'Playfair Display',serif",
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: PAL[i],
+                    }}
+                  >
+                    {d.initiatives.toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: 10, color: C.muted }}>{d.year}</div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+              ))}
+            </div>
+          </Card>
+        </div>
         <Card>
           <SectionTitle sub="Digital maturity across 2,706 company-reports">
             Digital Maturity Distribution
@@ -1723,8 +1866,16 @@ function OverviewPage() {
                     borderLeft: `3px solid ${MATPAL[d.name]}`,
                   }}
                 >
-                  <span style={{ fontSize: 12, fontWeight: 600 }}>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
                     {d.name}
+                    <HoverTip label={d.name} color={MATPAL[d.name]} />
                   </span>
                   <div style={{ display: "flex", gap: 10 }}>
                     <span style={{ fontSize: 11, color: C.muted }}>
@@ -1776,9 +1927,21 @@ function OverviewPage() {
                   style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <div
-                    style={{ fontSize: 11, fontWeight: 600, color: C.muted }}
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: C.muted,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
                   >
                     {d.dim}
+                    <HoverTip
+                      label={d.dim}
+                      color={d.color}
+                      desc={PLCT_DESC[d.short]}
+                      title={d.dim}
+                    />
                   </div>
                   <div
                     style={{
@@ -2039,9 +2202,9 @@ function PLCTPage() {
             <RadarChart
               cx="50%"
               cy="50%"
-              outerRadius="70%"
+              outerRadius="60%"
               data={DB.plctOverall.map((d) => ({
-                subject: d.short,
+                subject: d.dim,
                 A: d.score,
                 fullMark: 100,
               }))}
@@ -2049,7 +2212,34 @@ function PLCTPage() {
               <PolarGrid stroke={C.sand} />
               <PolarAngleAxis
                 dataKey="subject"
-                tick={{ fontSize: 14, fontWeight: 700, fill: C.text }}
+                tick={(props) => {
+                  const { x, y, payload, cx, cy } = props;
+                  const words = payload.value.split(" ");
+                  const mid = Math.ceil(words.length / 2);
+                  const line1 = words.slice(0, mid).join(" ");
+                  const line2 = words.slice(mid).join(" ");
+                  const anchor =
+                    Math.abs(x - cx) < 10 ? "middle" : x > cx ? "start" : "end";
+                  return (
+                    <text
+                      x={x}
+                      y={y}
+                      textAnchor={anchor}
+                      fill={C.text}
+                      fontSize={11}
+                      fontWeight={700}
+                    >
+                      <tspan x={x} dy={y < cy ? -4 : 4}>
+                        {line1}
+                      </tspan>
+                      {line2 && (
+                        <tspan x={x} dy={14}>
+                          {line2}
+                        </tspan>
+                      )}
+                    </text>
+                  );
+                }}
               />
               <PolarRadiusAxis
                 angle={90}
@@ -2088,7 +2278,7 @@ function PLCTPage() {
                   borderLeft: `3px solid ${d.color}`,
                 }}
               >
-                <span style={{ fontSize: 12, fontWeight: 600 }}>{d.short}</span>
+                <span style={{ fontSize: 11, fontWeight: 600 }}>{d.dim}</span>
                 <span
                   style={{
                     fontFamily: "'Playfair Display',serif",
@@ -2405,26 +2595,275 @@ function PLCTPage() {
 }
 
 /* ── PAGE: Sectors ──────────────────────────────────────────────── */
+const SECTOR_COLORS = [
+  "#0B4D3A",
+  "#C5973A",
+  "#1E6F7A",
+  "#B45309",
+  "#3730A3",
+  "#9D174D",
+  "#065F46",
+  "#1D4ED8",
+];
+
 function SectorsPage() {
   const [sortKey, setSortKey] = useState("total");
+  const [selectedSectors, setSelectedSectors] = useState([]);
+  const [selectedCompanySector, setSelectedCompanySector] = useState(null);
   const sorted = [...DB.sectorPLCT].sort((a, b) => b[sortKey] - a[sortKey]);
+
+  const toggleSector = (name) => {
+    setSelectedSectors((prev) =>
+      prev.includes(name)
+        ? prev.filter((s) => s !== name)
+        : prev.length >= 6
+          ? prev
+          : [...prev, name],
+    );
+  };
+
+  const comparisonData = ["CE", "PE", "OE", "NBM"].map((dim) => {
+    const row = { dim };
+    selectedSectors.forEach((s) => {
+      const d = DB.sectorPLCT.find((x) => x.sector === s);
+      if (d) row[s] = d[dim];
+    });
+    return row;
+  });
+
   return (
     <div>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1.3fr 1fr",
+          gridTemplateColumns: "1fr 1fr 1fr",
           gap: 16,
           marginBottom: 16,
         }}
       >
         <Card>
-          <SectionTitle sub="Unique companies per sector across all three years">
+          <SectionTitle sub="Unique companies per sector — click a bar to see PLCT breakdown">
             Companies by Sector
           </SectionTitle>
           <ResponsiveContainer width="100%" height={310}>
             <BarChart
               data={DB.sectorCompanies}
+              layout="vertical"
+              barCategoryGap="16%"
+              onClick={(e) => {
+                if (e && e.activePayload && e.activePayload[0]) {
+                  const name = e.activePayload[0].payload.name;
+                  setSelectedCompanySector((prev) =>
+                    prev === name ? null : name,
+                  );
+                }
+              }}
+              style={{ cursor: "pointer" }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={C.sand} />
+              <XAxis type="number" tick={{ fontSize: 11 }} />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={150}
+                tick={{ fontSize: 11 }}
+              />
+              <Tooltip content={<TT />} />
+              <Bar dataKey="count" name="Companies" radius={[0, 4, 4, 0]}>
+                {DB.sectorCompanies.map((d, i) => (
+                  <Cell
+                    key={i}
+                    fill={PAL[i % PAL.length]}
+                    opacity={
+                      selectedCompanySector && selectedCompanySector !== d.name
+                        ? 0.35
+                        : 1
+                    }
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+
+          {/* ── PLCT breakdown for clicked sector ── */}
+          {(() => {
+            if (!selectedCompanySector) return null;
+            const plct = DB.sectorPLCT.find(
+              (x) => x.sector === selectedCompanySector,
+            );
+            if (!plct)
+              return (
+                <div
+                  style={{
+                    marginTop: 12,
+                    fontSize: 11,
+                    color: C.muted,
+                    textAlign: "center",
+                  }}
+                >
+                  No PLCT data available for "{selectedCompanySector}"
+                </div>
+              );
+            const dims = [
+              { key: "OE", label: "Operational Efficiency", color: PAL[0] },
+              { key: "PE", label: "People Empowerment", color: PAL[1] },
+              { key: "CE", label: "Customer Experience", color: PAL[2] },
+              { key: "NBM", label: "New Business Models", color: PAL[3] },
+            ];
+            const max = Math.max(...dims.map((d) => plct[d.key]));
+            return (
+              <div
+                style={{
+                  marginTop: 14,
+                  borderTop: `2px solid ${C.sand}`,
+                  paddingTop: 12,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: C.emerald,
+                      }}
+                    >
+                      {selectedCompanySector}
+                    </div>
+                    <div style={{ fontSize: 10, color: C.muted }}>
+                      PLCT dimension breakdown · {plct.n.toLocaleString()}{" "}
+                      initiatives
+                    </div>
+                  </div>
+                  <span
+                    onClick={() => setSelectedCompanySector(null)}
+                    style={{
+                      fontSize: 11,
+                      color: C.muted,
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    Close
+                  </span>
+                </div>
+                {dims.map((d) => {
+                  const val = plct[d.key];
+                  const pct = (val / 100) * 100;
+                  const isTop = val === max;
+                  return (
+                    <div key={d.key} style={{ marginBottom: 8 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: 3,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: isTop ? 700 : 500,
+                            color: isTop ? d.color : C.text,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 5,
+                          }}
+                        >
+                          {isTop && <span style={{ fontSize: 9 }}>★</span>}
+                          {d.label}
+                          <span
+                            style={{
+                              fontSize: 10,
+                              color: C.muted,
+                              fontWeight: 400,
+                            }}
+                          >
+                            ({d.key})
+                          </span>
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: d.color,
+                          }}
+                        >
+                          {val.toFixed(1)}
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          background: C.sand,
+                          borderRadius: 4,
+                          height: 7,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: `${pct}%`,
+                            background: d.color,
+                            height: "100%",
+                            borderRadius: 4,
+                            transition: "width 0.4s ease",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+                <div
+                  style={{
+                    marginTop: 10,
+                    padding: "7px 12px",
+                    background: C.light,
+                    borderRadius: 7,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    border: `1px solid ${C.mint}30`,
+                  }}
+                >
+                  <span style={{ fontSize: 11, color: C.muted }}>
+                    PLCT Total
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 700,
+                      color: C.emerald,
+                      fontFamily: "'Playfair Display',serif",
+                    }}
+                  >
+                    {plct.total.toFixed(1)}
+                  </span>
+                  <span style={{ fontSize: 10, color: C.muted }}>
+                    Avg DQ: {plct.dq.toFixed(1)}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
+        </Card>
+
+        {/* ── Initiatives by Sector ── */}
+        <Card>
+          <SectionTitle sub="Total digital initiatives scored per sector">
+            Initiatives by Sector
+          </SectionTitle>
+          <ResponsiveContainer width="100%" height={310}>
+            <BarChart
+              data={[...DB.sectorPLCT]
+                .sort((a, b) => b.n - a.n)
+                .map((d) => ({ name: d.sector, count: d.n }))}
               layout="vertical"
               barCategoryGap="16%"
             >
@@ -2437,14 +2876,17 @@ function SectorsPage() {
                 tick={{ fontSize: 11 }}
               />
               <Tooltip content={<TT />} />
-              <Bar dataKey="count" name="Companies" radius={[0, 4, 4, 0]}>
-                {DB.sectorCompanies.map((_, i) => (
-                  <Cell key={i} fill={PAL[i % PAL.length]} />
-                ))}
+              <Bar dataKey="count" name="Initiatives" radius={[0, 4, 4, 0]}>
+                {[...DB.sectorPLCT]
+                  .sort((a, b) => b.n - a.n)
+                  .map((_, i) => (
+                    <Cell key={i} fill={PAL[i % PAL.length]} />
+                  ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </Card>
+
         <Card>
           <SectionTitle sub="Digital maturity progression across 2022–2024">
             Maturity by Year
@@ -2526,7 +2968,7 @@ function SectorsPage() {
             marginBottom: 14,
           }}
         >
-          <SectionTitle sub="Normalised PLCT scores per industry sector">
+          <SectionTitle sub="Normalised PLCT scores per industry sector — click rows to compare">
             Sector PLCT Index — All 16 Sectors
           </SectionTitle>
           <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
@@ -2582,96 +3024,384 @@ function SectorsPage() {
               </tr>
             </thead>
             <tbody>
-              {sorted.map((d, i) => (
-                <tr
-                  key={i}
-                  style={{ background: i % 2 === 0 ? C.white : C.cream }}
-                >
-                  <td
+              {sorted.map((d, i) => {
+                const isSelected = selectedSectors.includes(d.sector);
+                const selIdx = selectedSectors.indexOf(d.sector);
+                const selColor = isSelected
+                  ? SECTOR_COLORS[selIdx % SECTOR_COLORS.length]
+                  : null;
+                return (
+                  <tr
+                    key={i}
+                    onClick={() => toggleSector(d.sector)}
                     style={{
-                      padding: "7px 10px",
-                      fontWeight: 700,
-                      color:
-                        i === 0
-                          ? C.gold
-                          : i === 1
-                            ? "#6B7280"
-                            : i === 2
-                              ? "#B45309"
+                      background: isSelected
+                        ? `${selColor}18`
+                        : i % 2 === 0
+                          ? C.white
+                          : C.cream,
+                      cursor: "pointer",
+                      outline: isSelected ? `2px solid ${selColor}` : "none",
+                      outlineOffset: -1,
+                      transition: "background 0.15s",
+                    }}
+                  >
+                    <td
+                      style={{
+                        padding: "7px 10px",
+                        fontWeight: 700,
+                        color:
+                          i === 0
+                            ? C.gold
+                            : i === 1
+                              ? "#6B7280"
+                              : i === 2
+                                ? "#B45309"
+                                : C.muted,
+                      }}
+                    >
+                      {i === 0
+                        ? "🥇"
+                        : i === 1
+                          ? "🥈"
+                          : i === 2
+                            ? "🥉"
+                            : `#${i + 1}`}
+                    </td>
+                    <td
+                      style={{
+                        padding: "7px 10px",
+                        fontWeight: 600,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 7,
+                      }}
+                    >
+                      {isSelected && (
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            background: selColor,
+                            flexShrink: 0,
+                          }}
+                        />
+                      )}
+                      {d.sector}
+                    </td>
+                    <td style={{ padding: "7px 10px" }}>
+                      <ScoreBadge v={d.total} />
+                    </td>
+                    <td
+                      style={{
+                        padding: "7px 10px",
+                        color:
+                          d.CE >= 40 ? C.mint : d.CE >= 30 ? C.accent : C.muted,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {d.CE.toFixed(1)}
+                    </td>
+                    <td
+                      style={{
+                        padding: "7px 10px",
+                        color:
+                          d.PE >= 42 ? C.mint : d.PE >= 38 ? C.accent : C.muted,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {d.PE.toFixed(1)}
+                    </td>
+                    <td
+                      style={{
+                        padding: "7px 10px",
+                        color: C.emerald,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {d.OE.toFixed(1)}
+                    </td>
+                    <td
+                      style={{
+                        padding: "7px 10px",
+                        color:
+                          d.NBM >= 28
+                            ? C.mint
+                            : d.NBM >= 20
+                              ? C.accent
                               : C.muted,
-                    }}
-                  >
-                    {i === 0
-                      ? "🥇"
-                      : i === 1
-                        ? "🥈"
-                        : i === 2
-                          ? "🥉"
-                          : `#${i + 1}`}
-                  </td>
-                  <td style={{ padding: "7px 10px", fontWeight: 600 }}>
-                    {d.sector}
-                  </td>
-                  <td style={{ padding: "7px 10px" }}>
-                    <ScoreBadge v={d.total} />
-                  </td>
-                  <td
-                    style={{
-                      padding: "7px 10px",
-                      color:
-                        d.CE >= 40 ? C.mint : d.CE >= 30 ? C.accent : C.muted,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {d.CE.toFixed(1)}
-                  </td>
-                  <td
-                    style={{
-                      padding: "7px 10px",
-                      color:
-                        d.PE >= 42 ? C.mint : d.PE >= 38 ? C.accent : C.muted,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {d.PE.toFixed(1)}
-                  </td>
-                  <td
-                    style={{
-                      padding: "7px 10px",
-                      color: C.emerald,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {d.OE.toFixed(1)}
-                  </td>
-                  <td
-                    style={{
-                      padding: "7px 10px",
-                      color:
-                        d.NBM >= 28 ? C.mint : d.NBM >= 20 ? C.accent : C.muted,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {d.NBM.toFixed(1)}
-                  </td>
-                  <td style={{ padding: "7px 10px" }}>
-                    {d.n.toLocaleString()}
-                  </td>
-                  <td
-                    style={{
-                      padding: "7px 10px",
-                      fontWeight: 600,
-                      color:
-                        d.dq >= 55 ? C.mint : d.dq >= 52 ? C.accent : C.muted,
-                    }}
-                  >
-                    {d.dq.toFixed(1)}
-                  </td>
-                </tr>
-              ))}
+                        fontWeight: 600,
+                      }}
+                    >
+                      {d.NBM.toFixed(1)}
+                    </td>
+                    <td style={{ padding: "7px 10px" }}>
+                      {d.n.toLocaleString()}
+                    </td>
+                    <td
+                      style={{
+                        padding: "7px 10px",
+                        fontWeight: 600,
+                        color:
+                          d.dq >= 55 ? C.mint : d.dq >= 52 ? C.accent : C.muted,
+                      }}
+                    >
+                      {d.dq.toFixed(1)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
+
+        {/* ── Comparison panel ── */}
+        {selectedSectors.length > 0 && (
+          <div style={{ marginTop: 20 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 12,
+              }}
+            >
+              <div>
+                <div
+                  style={{ fontSize: 13, fontWeight: 700, color: C.emerald }}
+                >
+                  Sector Comparison
+                </div>
+                <div style={{ fontSize: 11, color: C.muted }}>
+                  PLCT dimension breakdown — {selectedSectors.length} sector
+                  {selectedSectors.length > 1 ? "s" : ""} selected
+                </div>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 6,
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                }}
+              >
+                {selectedSectors.map((s, i) => (
+                  <span
+                    key={s}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleSector(s);
+                    }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                      padding: "3px 10px",
+                      borderRadius: 20,
+                      background: SECTOR_COLORS[i % SECTOR_COLORS.length],
+                      color: C.white,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {s} ×
+                  </span>
+                ))}
+                <span
+                  onClick={() => setSelectedSectors([])}
+                  style={{
+                    fontSize: 11,
+                    color: C.muted,
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    marginLeft: 4,
+                  }}
+                >
+                  Clear all
+                </span>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 16,
+              }}
+            >
+              {/* Grouped bar chart */}
+              <div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: C.muted,
+                    marginBottom: 6,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  PLCT Dimension Breakdown
+                </div>
+                <ResponsiveContainer width="100%" height={230}>
+                  <BarChart
+                    data={comparisonData}
+                    barCategoryGap="25%"
+                    barGap={3}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke={C.sand} />
+                    <XAxis
+                      dataKey="dim"
+                      tick={{ fontSize: 11, fontWeight: 700 }}
+                    />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+                    <Tooltip content={<TT />} />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    {selectedSectors.map((s, i) => (
+                      <Bar
+                        key={s}
+                        dataKey={s}
+                        name={s}
+                        fill={SECTOR_COLORS[i % SECTOR_COLORS.length]}
+                        radius={[3, 3, 0, 0]}
+                      />
+                    ))}
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Radar overlay */}
+              <div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: C.muted,
+                    marginBottom: 6,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Radar Overlay
+                </div>
+                <ResponsiveContainer width="100%" height={230}>
+                  <RadarChart
+                    cx="50%"
+                    cy="50%"
+                    outerRadius="65%"
+                    data={["CE", "PE", "OE", "NBM"].map((dim) => {
+                      const row = { subject: dim };
+                      selectedSectors.forEach((s) => {
+                        const d = DB.sectorPLCT.find((x) => x.sector === s);
+                        if (d) row[s] = d[dim];
+                      });
+                      return row;
+                    })}
+                  >
+                    <PolarGrid stroke={C.sand} />
+                    <PolarAngleAxis
+                      dataKey="subject"
+                      tick={{ fontSize: 12, fontWeight: 700, fill: C.text }}
+                    />
+                    <PolarRadiusAxis
+                      angle={90}
+                      domain={[0, 70]}
+                      tick={{ fontSize: 9, fill: C.muted }}
+                      tickCount={4}
+                    />
+                    <Tooltip content={<TT />} />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    {selectedSectors.map((s, i) => (
+                      <Radar
+                        key={s}
+                        name={s}
+                        dataKey={s}
+                        stroke={SECTOR_COLORS[i % SECTOR_COLORS.length]}
+                        fill={SECTOR_COLORS[i % SECTOR_COLORS.length]}
+                        fillOpacity={0.15}
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                      />
+                    ))}
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Score summary pills */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${Math.min(selectedSectors.length, 4)}, 1fr)`,
+                gap: 10,
+                marginTop: 14,
+              }}
+            >
+              {selectedSectors.map((s, i) => {
+                const d = DB.sectorPLCT.find((x) => x.sector === s);
+                if (!d) return null;
+                const color = SECTOR_COLORS[i % SECTOR_COLORS.length];
+                return (
+                  <div
+                    key={s}
+                    style={{
+                      background: C.cream,
+                      borderRadius: 10,
+                      padding: "12px 14px",
+                      borderLeft: `4px solid ${color}`,
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color,
+                        marginBottom: 6,
+                      }}
+                    >
+                      {s}
+                    </div>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 4,
+                      }}
+                    >
+                      {["CE", "PE", "OE", "NBM"].map((dim) => (
+                        <div key={dim} style={{ fontSize: 11 }}>
+                          <span style={{ color: C.muted }}>{dim} </span>
+                          <span style={{ fontWeight: 700, color }}>
+                            {d[dim].toFixed(1)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        fontSize: 11,
+                        borderTop: `1px solid ${C.sand}`,
+                        paddingTop: 5,
+                      }}
+                    >
+                      <span style={{ color: C.muted }}>Total </span>
+                      <span style={{ fontWeight: 700, fontSize: 14, color }}>
+                        {d.total.toFixed(1)}
+                      </span>
+                      <span style={{ color: C.muted, marginLeft: 8 }}>
+                        n={d.n.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </Card>
       <Card>
         <SectionTitle sub="PLCT total score year-on-year for 5 key sectors">
@@ -2837,8 +3567,21 @@ function InitiativesPage() {
                         background: [C.emerald, C.gold, C.accent][i],
                       }}
                     />
-                    <span style={{ fontSize: 12, fontWeight: 700 }}>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
                       {d.name}
+                      <HoverTip
+                        label={d.name}
+                        color={[C.emerald, C.gold, C.accent][i]}
+                        desc={INNOV_DESC[d.name]}
+                        title={`${d.name} Innovation`}
+                      />
                     </span>
                   </div>
                   <div style={{ fontSize: 11, color: C.muted, marginLeft: 17 }}>
@@ -3048,21 +3791,23 @@ function InitiativesPage() {
             </Btn>
           </div>
         </div>
-        <ResponsiveContainer width="100%" height={290}>
+        <ResponsiveContainer width="100%" height={420}>
           <BarChart
             data={[...DB.topInitiatives].sort(
               (a, b) => b[sortInit] - a[sortInit],
             )}
             layout="vertical"
-            barCategoryGap="10%"
+            barCategoryGap="12%"
+            margin={{ left: 8, right: 16, top: 4, bottom: 4 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke={C.sand} />
             <XAxis type="number" tick={{ fontSize: 11 }} />
             <YAxis
               type="category"
               dataKey="name"
-              width={195}
-              tick={{ fontSize: 11 }}
+              width={215}
+              tick={{ fontSize: 11, fill: C.text }}
+              tickLine={false}
             />
             <Tooltip content={<TT />} />
             <Bar
