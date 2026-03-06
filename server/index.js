@@ -31,8 +31,50 @@ function loadExcelContext() {
         }),
       );
 
+    // Build company id→name/sector lookup
+    const companyLookup = {};
+    for (const c of companies)
+      companyLookup[c.id] = { name: c.company_name, sector: c.company_sector };
+
     // Sheet 3: Initiatives — aggregate scores per company/sector (skip long text rationale fields)
     const rawInitiatives = XLSX.utils.sheet_to_json(wb.Sheets["Initiatives"]);
+
+    // Compact initiatives list — analytical fields only (no text descriptions to stay within token limits)
+    const initiatives = rawInitiatives.map((r) => {
+      const co = companyLookup[r.company_id] || {};
+      return [
+        r.id,
+        co.name || r.stock_code,
+        co.sector,
+        r.category,
+        r.plct_alignment,
+        r.innovation_level,
+        r.plct_customer_experience_score,
+        r.plct_people_empowerment_score,
+        r.plct_operational_efficiency_score,
+        r.plct_new_business_models_score,
+        r.plct_total_score,
+        r.plct_dominant_dimension,
+        r.disclosure_quality_tier,
+      ];
+    });
+    // Header for the initiatives array
+    const initiativesHeader = [
+      "id",
+      "company",
+      "sector",
+      "category",
+      "plct_alignment",
+      "innovation",
+      "ce",
+      "pe",
+      "oe",
+      "nbm",
+      "plct_total",
+      "dominant",
+      "dq_tier",
+    ];
+
     const sectorMap = {};
     for (const row of rawInitiatives) {
       const sector = row.company_sector || "Unknown";
@@ -105,7 +147,13 @@ function loadExcelContext() {
       );
 
     return JSON.stringify(
-      { companies, sectorSummary, companyReports },
+      {
+        companies,
+        sectorSummary,
+        companyReports,
+        initiativesHeader,
+        initiatives,
+      },
       null,
       0,
     );
@@ -148,19 +196,22 @@ You have been given two sources of structured data:
 
 1. DASHBOARD SUMMARY DATA (sent per request): Pre-aggregated PLCT scores, sector rankings, year-on-year trends, maturity distributions, and strategic recommendations covering 12,192 digital initiatives from 854 companies (2022–2024).
 
-2. RAW DATABASE (loaded from data.xlsx, always available below): Three datasets —
+2. RAW DATABASE (loaded from data.xlsx, always available below): Four datasets —
    - "companies": 1,127 unique Bursa Malaysia-listed companies with sector, years covered, and report count.
    - "sectorSummary": Per-sector aggregated average PLCT dimension scores (CE, PE, OE, NBM), initiative counts, innovation level breakdown, maturity distribution, and top initiative categories.
    - "companyReports": 2,706 company-year snapshots with digital maturity level and strategic priority.
+   - "initiativesHeader": Column labels for the initiatives rows — ["id","company","sector","category","plct_alignment","innovation","ce","pe","oe","nbm","plct_total","dominant","dq_tier"].
+   - "initiatives": All 12,192 individual digital initiatives as compact arrays (matching initiativesHeader order) with company name, sector, category, PLCT alignment, innovation level, individual dimension scores (ce, pe, oe, nbm), total PLCT score, dominant dimension, and disclosure quality tier. Use this to answer specific questions about individual companies' initiatives, filter by sector/category/innovation level, or rank companies by PLCT scores.
 
 Answering guidelines:
 - Be analytical, precise, and concise. Cite specific numbers from the data where relevant.
-- When asked about a specific company, look it up in the companies or companyReports arrays.
+- When asked about a specific company, search through the initiatives array for rows where index 1 (company name) matches, and directly report the results — DO NOT output code blocks or tool_code.
 - When comparing sectors or dimensions, use the sectorSummary averages and highlight the gap and its significance.
 - If asked for recommendations, base them on the REC data provided.
 - If a question is entirely outside the scope of the dashboard data, say so clearly.
 - Format responses with short paragraphs or bullet points for readability.
-- NEVER fabricate numbers — only use values present in the provided context.`;
+- NEVER fabricate numbers — only use values present in the provided context.
+- NEVER output code, tool_code blocks, or pseudo-code. Always answer directly in plain text or markdown.`;
 
 app.post("/api/chat", async (req, res) => {
   const { messages, context } = req.body;
