@@ -1613,7 +1613,7 @@ function OverviewPage() {
             fontWeight: 700,
           }}
         >
-          Bursa Malaysia · 2022–2024
+          Malaysia Listed Companies · 2022–2024
         </p>
         <h1
           style={{
@@ -6918,7 +6918,7 @@ export default function App() {
                       lineHeight: 1.2,
                     }}
                   >
-                    Islamic Digital Economy Index
+                    Digital Enablement Initiatives Index
                   </div>
                   <div
                     style={{
@@ -6929,7 +6929,7 @@ export default function App() {
                       marginTop: 2,
                     }}
                   >
-                    Malaysia · Bursa Malaysia · 2022–2024 Research Dashboard
+                    Malaysia · Listed Companies · 2022–2024 Research Dashboard
                   </div>
                 </div>
               </div>
