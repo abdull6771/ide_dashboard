@@ -1,13 +1,26 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const isProd = process.env.NODE_ENV === "production";
 
-app.use(cors({ origin: "http://localhost:5173" }));
+// In dev allow the Vite dev server; in prod the frontend is served from the same origin
+app.use(
+  cors({
+    origin: isProd ? false : "http://localhost:5173",
+  })
+);
 app.use(express.json({ limit: "2mb" }));
+
+// Serve built frontend in production
+if (isProd) {
+  const distPath = path.join(__dirname, "../dist");
+  app.use(express.static(distPath));
+}
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -42,7 +55,7 @@ app.post("/api/chat", async (req, res) => {
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       systemInstruction:
         SYSTEM_INSTRUCTION +
         (context
@@ -73,6 +86,13 @@ app.post("/api/chat", async (req, res) => {
 });
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
+
+// SPA fallback — serve index.html for all non-API routes in production
+if (isProd) {
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(__dirname, "../dist/index.html"));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`✅  DEII AI server running on http://localhost:${PORT}`);
