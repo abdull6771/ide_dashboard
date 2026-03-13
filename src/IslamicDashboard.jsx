@@ -6358,6 +6358,23 @@ function RecommendationsPage() {
           derived from PLCT index analysis of 1,127 companies, 12,192
           initiatives and 2,706 annual reports.
         </div>
+        <div
+          style={{
+            fontSize: 10,
+            color: "#A8D5B1",
+            marginTop: 8,
+            fontStyle: "italic",
+            background: "rgba(0,0,0,0.15)",
+            padding: "10px",
+            borderRadius: 6,
+            opacity: 0.9,
+          }}
+        >
+          Disclaimer: These recommendations are AI-generated and are intended as
+          possible suggestions. Users should conduct their own analysis or
+          contact our team for a more in-depth assessment and tailored
+          recommendations.
+        </div>
       </div>
 
       {/* Sub-nav */}
