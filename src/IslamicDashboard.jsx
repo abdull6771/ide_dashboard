@@ -1770,6 +1770,27 @@ function OverviewPage() {
                 </div>
               ))}
             </div>
+            {/* ── Companies insight ── */}
+            <div
+              style={{
+                marginTop: 10,
+                background: "linear-gradient(135deg,#f0fdf4,#dcfce7)",
+                border: "1px solid #86efac",
+                borderRadius: 8,
+                padding: "8px 12px",
+                display: "flex",
+                gap: 8,
+                alignItems: "flex-start",
+              }}
+            >
+              <span style={{ fontSize: 14 }}>📈</span>
+              <p style={{ margin: 0, fontSize: 11, lineHeight: 1.5, color: "#166534" }}>
+                Coverage expanded by <strong>+138 companies (+19.3%)</strong> from 2022
+                to 2024, with accelerating growth — +8.0% in 2023 and +10.5% in 2024.
+                This broadening dataset strengthens the representativeness of PLCT
+                benchmarks across Bursa Malaysia-listed companies.
+              </p>
+            </div>
           </Card>
 
           {/* ── Initiatives figure ── */}
@@ -1822,6 +1843,28 @@ function OverviewPage() {
                   <div style={{ fontSize: 10, color: C.muted }}>{d.year}</div>
                 </div>
               ))}
+            </div>
+            {/* ── Initiatives insight ── */}
+            <div
+              style={{
+                marginTop: 10,
+                background: "linear-gradient(135deg,#fffbeb,#fef3c7)",
+                border: "1px solid #fcd34d",
+                borderRadius: 8,
+                padding: "8px 12px",
+                display: "flex",
+                gap: 8,
+                alignItems: "flex-start",
+              }}
+            >
+              <span style={{ fontSize: 14 }}>🚀</span>
+              <p style={{ margin: 0, fontSize: 11, lineHeight: 1.5, color: "#92400e" }}>
+                Digital initiatives grew by <strong>+637 (+19.0%)</strong> from 2022
+                to 2024, with pace accelerating — +7.3% in 2023 and +10.8% in 2024.
+                Growth in initiatives outpaces company coverage, averaging{" "}
+                <strong>~4.7 initiatives per company</strong> in 2024, signalling
+                deeper digital commitment per organisation year-on-year.
+              </p>
             </div>
           </Card>
         </div>
@@ -1894,6 +1937,28 @@ function OverviewPage() {
                   </div>
                 </div>
               ))}
+            </div>
+            {/* ── Maturity insight ── */}
+            <div
+              style={{
+                marginTop: 10,
+                background: "linear-gradient(135deg,#fdf4ff,#f3e8ff)",
+                border: "1px solid #c084fc",
+                borderRadius: 8,
+                padding: "8px 12px",
+                display: "flex",
+                gap: 8,
+                alignItems: "flex-start",
+              }}
+            >
+              <span style={{ fontSize: 14 }}>⚠️</span>
+              <p style={{ margin: 0, fontSize: 11, lineHeight: 1.5, color: "#6b21a8" }}>
+                <strong>77.8% of company-reports sit at Developing</strong> — signalling
+                structured effort but incomplete integration. Only{" "}
+                <strong>4 companies (0.1%) reached Advanced</strong>, a figure unchanged
+                across 2022–2024, indicating the pathway to full digital maturity remains
+                a critical gap requiring targeted intervention.
+              </p>
             </div>
           </div>
         </Card>
@@ -2293,6 +2358,31 @@ function PLCTPage() {
               </div>
             ))}
           </div>
+          {/* ── Radar insight ── */}
+          <div
+            style={{
+              marginTop: 10,
+              background: "linear-gradient(135deg,#f0fdfa,#ccfbf1)",
+              border: "1px solid #5eead4",
+              borderRadius: 8,
+              padding: "8px 12px",
+              display: "flex",
+              gap: 8,
+              alignItems: "flex-start",
+            }}
+          >
+            <span style={{ fontSize: 14 }}>🎯</span>
+            <p style={{ margin: 0, fontSize: 11, lineHeight: 1.5, color: "#134e4a" }}>
+              The radar reveals a <strong>heavily lopsided PLCT profile</strong>: OE
+              dominates at <strong>61.7/100</strong> while NBM lags at{" "}
+              <strong>19.0/100</strong> — a <strong>3.2× gap</strong> between the
+              strongest and weakest dimension. With a combined average of ~150.8/400
+              (37.7% of maximum), Bursa Malaysia-listed companies are{" "}
+              <strong>operationally capable but strategically underdeveloped</strong>,
+              signalling urgent need to invest in customer-facing innovation and
+              new business model creation.
+            </p>
+          </div>
         </Card>
         <Card>
           <SectionTitle sub="Dimension scores with dominant dimension analysis">
@@ -2542,6 +2632,31 @@ function PLCTPage() {
             </div>
           </div>
         </div>
+        {/* ── PLCT Trends insight ── */}
+        <div
+          style={{
+            marginTop: 14,
+            background: "linear-gradient(135deg,#fff1f2,#ffe4e6)",
+            border: "1px solid #fca5a5",
+            borderRadius: 8,
+            padding: "8px 12px",
+            display: "flex",
+            gap: 8,
+            alignItems: "flex-start",
+          }}
+        >
+          <span style={{ fontSize: 14 }}>🔍</span>
+          <p style={{ margin: 0, fontSize: 11, lineHeight: 1.5, color: "#9f1239" }}>
+            Overall PLCT improved modestly from <strong>148.7 → 150.2 (+1.5 pts)</strong>{" "}
+            over 2022–2024. <strong>Operational Efficiency (OE)</strong> leads all
+            dimensions and is the only one with consistent growth (+2.2 pts), while{" "}
+            <strong>Customer Experience (CE) is the sole declining dimension</strong>{" "}
+            (−2.0 pts) — a critical signal. New Business Models (NBM) remains the
+            lowest-scoring dimension (19.0/100), highlighting{" "}
+            <strong>innovation as the largest untapped opportunity</strong> across
+            Bursa Malaysia-listed companies.
+          </p>
+        </div>
       </Card>
       <Card>
         <div
@@ -2589,6 +2704,31 @@ function PLCTPage() {
           }}
         >
           {distDesc[distDim]}
+        </div>
+        {/* ── Score Frequency insight ── */}
+        <div
+          style={{
+            marginTop: 10,
+            background: "linear-gradient(135deg,#eff6ff,#dbeafe)",
+            border: "1px solid #93c5fd",
+            borderRadius: 8,
+            padding: "8px 12px",
+            display: "flex",
+            gap: 8,
+            alignItems: "flex-start",
+          }}
+        >
+          <span style={{ fontSize: 14 }}>📊</span>
+          <p style={{ margin: 0, fontSize: 11, lineHeight: 1.5, color: "#1e3a8a" }}>
+            Score distributions reveal a <strong>two-speed digital economy</strong>:
+            OE clusters at 60–79 (compliance-led strength), while CE and NBM are
+            heavily skewed to 10–19 —{" "}
+            <strong>NBM alone has 7,944 initiatives scoring below 20</strong>, and CE
+            has 4,108. This pattern indicates that companies have mastered operational
+            reporting but <strong>struggle to translate digital activity into
+            customer value or new revenue streams</strong>, the dimensions that
+            drive long-term competitive differentiation.
+          </p>
         </div>
       </Card>
     </div>
